@@ -1,12 +1,9 @@
 const path = require("path");
 const http = require("http");
 const express = require("express");
-const { Server } = require("socket.io");
 
-import {
-    Hierarchy,
-    Entity
-} from "./models/data-model";
+import { Server, Socket } from "socket.io";
+import { HierarchyInterface, Hierarchy } from "./data-models/hierarchy";
 
 /**
  * Create server instance & configure
@@ -30,7 +27,7 @@ app.get("/", (req, res) => {
 /**
  * Socket.io event handlers
  */
-io.on("connection", (socket) => {
+io.on("connection", (socket: Socket) => {
     console.log(`User: ${socket.id} connected`);
     socket.emit("init", hierarchy.getData());
 
@@ -55,7 +52,25 @@ io.on("connection", (socket) => {
 /**
  * Initial setup
  */
-const hierarchy = new Hierarchy("-1#0");
+const hierarchy: HierarchyInterface = new Hierarchy("-1#0");
+
+// TEST
+hierarchy.addEntity({
+    id: "1#0",
+    relationship: {
+        parentId: "-1#0",
+        fractionalIndex: 0.0
+    },
+    properties: {}
+});
+hierarchy.addEntity({
+    id: "2#0",
+    relationship: {
+        parentId: "-1#0",
+        fractionalIndex: 0.0
+    },
+    properties: {}
+});
 
 /**
  * Initiate server

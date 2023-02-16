@@ -3,14 +3,14 @@ exports.__esModule = true;
 var path = require("path");
 var http = require("http");
 var express = require("express");
-var Server = require("socket.io").Server;
-var data_model_1 = require("./models/data-model");
+var socket_io_1 = require("socket.io");
+var hierarchy_1 = require("./data-models/hierarchy");
 /**
  * Create server instance & configure
  */
 var app = express();
 var server = http.createServer(app);
-var io = new Server(server);
+var io = new socket_io_1.Server(server);
 /**
  * Middleware
  */
@@ -44,7 +44,24 @@ io.on("connection", function (socket) {
 /**
  * Initial setup
  */
-var hierarchy = new data_model_1.Hierarchy("-1#0");
+var hierarchy = new hierarchy_1.Hierarchy("-1#0");
+// TEST
+hierarchy.addEntity({
+    id: "1#0",
+    relationship: {
+        parentId: "-1#0",
+        fractionalIndex: 0.0
+    },
+    properties: {}
+});
+hierarchy.addEntity({
+    id: "2#0",
+    relationship: {
+        parentId: "-1#0",
+        fractionalIndex: 0.0
+    },
+    properties: {}
+});
 /**
  * Initiate server
  */
