@@ -1,0 +1,19 @@
+{
+  "name": "crdt-sync-server",
+  "version": "1.0.0",
+  "description": "Server implementation for CRDT-based multiplayer prototype",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zkpranav/crdt-sync-server.git"
+  },
+  "author": "zkpranav",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/zkpranav/crdt-sync-server/issues"
+  },
+  "homepage": "https://github.com/zkpranav/crdt-sync-server#readme"
+}
