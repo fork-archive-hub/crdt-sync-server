@@ -2,9 +2,10 @@
   "name": "crdt-sync-server",
   "version": "1.0.0",
   "description": "Server implementation for CRDT-based multiplayer prototype",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "compile": "tsc src/*ts",
+    "dev": "node src/server.js"
   },
   "repository": {
     "type": "git",
