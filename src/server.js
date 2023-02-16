@@ -14,7 +14,7 @@ var io = new Server(server);
 /**
  * Middleware
  */
-app.use(express.static("client/dist"));
+app.use(express.static("dist"));
 /**
  * Resolvers
  */
