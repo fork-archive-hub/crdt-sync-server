@@ -53,7 +53,10 @@ interface HierarchyInterface {
     },
     tree: TreeInterface,
     addEntity(entity: Entity): boolean,
-    deleteEntity(id: string): boolean,
+    deleteEntity(id: string): {
+        result: boolean,
+        ids: string[]
+    },
     reparent(id: string, newParentId: string): boolean,
     getData(id?: string): string
 }
@@ -73,6 +76,8 @@ class Hierarchy implements HierarchyInterface {
         // Initialize document w/ a mapping of document objects
         this.rootId = rootId;
         this.entities = {};
+    
+        this.initializeTree();
         this.entities[rootId] = new Entity(
             rootId,
             {
@@ -81,8 +86,6 @@ class Hierarchy implements HierarchyInterface {
             },
             {}
         );
-
-        this.initializeTree();
     }
 
     initializeTree() {
@@ -104,7 +107,10 @@ class Hierarchy implements HierarchyInterface {
         return false;
     }
 
-    deleteEntity(id: string): boolean {
+    deleteEntity(id: string): {
+        result: boolean,
+        ids: string[]
+    } {
         const nodes = this.tree.deleteNode(id);
         if (
             nodes.length
@@ -112,10 +118,10 @@ class Hierarchy implements HierarchyInterface {
             nodes.forEach((id) => {
                 delete this.entities[id];
             })
-            return true;
+            return { result: true, ids: nodes };
         }
 
-        return false;
+        return { result: false, ids: [] };
     }
 
     reparent(id: string, newParentId: string): boolean {

@@ -27,11 +27,11 @@ var Hierarchy = /** @class */ (function () {
         // Initialize document w/ a mapping of document objects
         this.rootId = rootId;
         this.entities = {};
+        this.initializeTree();
         this.entities[rootId] = new Entity(rootId, {
             parentId: rootId,
             fractionalIndex: 0.0
         }, {});
-        this.initializeTree();
     }
     Hierarchy.prototype.initializeTree = function () {
         this.tree = new tree_js_1.Tree(this.rootId);
@@ -54,9 +54,9 @@ var Hierarchy = /** @class */ (function () {
             nodes.forEach(function (id) {
                 delete _this.entities[id];
             });
-            return true;
+            return { result: true, ids: nodes };
         }
-        return false;
+        return { result: false, ids: [] };
     };
     Hierarchy.prototype.reparent = function (id, newParentId) {
         // Perform reparenting in tree representation
