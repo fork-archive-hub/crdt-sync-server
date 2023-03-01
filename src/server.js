@@ -27,15 +27,37 @@ app.get("/", function (req, res) {
 io.on("connection", function (socket) {
     console.log("User: ".concat(socket.id, " connected"));
     socket.emit("init", hierarchy.getData());
-    socket.on("createEntity", function (data) {
+    socket.on("createEntity", function (data, callback) {
+        var entityData = JSON.parse(data)[0];
         // Handle create entity
-        console.log(data);
+        if (hierarchy.addEntity(new hierarchy_1.Entity(entityData.id, {
+            parentId: entityData.relationship.parentId,
+            fractionalIndex: entityData.relationship.fractionalIndex
+        }, entityData.properties))) {
+            // Broadcast to other sockets
+            socket.broadcast.emit("createEntity", hierarchy.getData(entityData.id));
+            callback({
+                status: "OK"
+            });
+        }
+        else {
+            callback({
+                status: "Err"
+            });
+        }
     });
-    socket.on("deleteEntity", function (data) {
+    socket.on("deleteEntity", function (id) {
         // Handle delete entity
+        var res = hierarchy.deleteEntity(id);
+        if (res.result) {
+            // Broadcast to other sockets
+            io.emit("deleteEntity", res.ids);
+        }
     });
-    socket.on("reparentEntity", function (data) {
+    socket.on("reparentEntity", function (reparentData) {
         // Handle reparent entity
+        console.log("on reparentEntity: ");
+        console.log(reparentData);
     });
     socket.on("disconnect", function () {
         console.log("User: ".concat(socket.id, " disconnected"));
@@ -47,7 +69,7 @@ io.on("connection", function (socket) {
 var hierarchy = new hierarchy_1.Hierarchy("-1#0");
 // TEST
 hierarchy.addEntity({
-    id: "1#0",
+    id: "-1#1",
     relationship: {
         parentId: "-1#0",
         fractionalIndex: 0.0
@@ -55,7 +77,7 @@ hierarchy.addEntity({
     properties: {}
 });
 hierarchy.addEntity({
-    id: "2#0",
+    id: "-1#2",
     relationship: {
         parentId: "-1#0",
         fractionalIndex: 0.0
