@@ -26,38 +26,20 @@ app.get("/", function (req, res) {
  */
 io.on("connection", function (socket) {
     console.log("User: ".concat(socket.id, " connected"));
-    socket.emit("init", hierarchy.getData());
     socket.on("createEntity", function (data, callback) {
         var entityData = JSON.parse(data)[0];
-        // Handle create entity
-        if (hierarchy.addEntity(new hierarchy_1.Entity(entityData.id, {
-            parentId: entityData.relationship.parentId,
-            fractionalIndex: entityData.relationship.fractionalIndex
-        }, entityData.properties))) {
-            // Broadcast to other sockets
-            socket.broadcast.emit("createEntity", hierarchy.getData(entityData.id));
-            callback({
-                status: "OK"
-            });
-        }
-        else {
-            callback({
-                status: "Err"
-            });
-        }
+        console.log("on createEntity: ");
+        console.log("data: ".concat(entityData));
+        callback({ status: "ok" });
     });
     socket.on("deleteEntity", function (id) {
-        // Handle delete entity
-        var res = hierarchy.deleteEntity(id);
-        if (res.result) {
-            // Broadcast to other sockets
-            io.emit("deleteEntity", res.ids);
-        }
+        console.log("on deleteEntity: ");
+        console.log("data: ".concat(id));
     });
     socket.on("reparentEntity", function (reparentData) {
         // Handle reparent entity
         console.log("on reparentEntity: ");
-        console.log(reparentData);
+        console.log("data: ".concat(reparentData));
     });
     socket.on("disconnect", function () {
         console.log("User: ".concat(socket.id, " disconnected"));
@@ -66,24 +48,23 @@ io.on("connection", function (socket) {
 /**
  * Initial setup
  */
-var hierarchy = new hierarchy_1.Hierarchy("-1#0");
-// TEST
-hierarchy.addEntity({
-    id: "-1#1",
-    relationship: {
-        parentId: "-1#0",
-        fractionalIndex: 0.0
-    },
-    properties: {}
-});
-hierarchy.addEntity({
-    id: "-1#2",
-    relationship: {
-        parentId: "-1#0",
-        fractionalIndex: 0.0
-    },
-    properties: {}
-});
+var hierarchy = new hierarchy_1.Hierarchy("-1#-1");
+hierarchy.addEntity("-1#0", 0);
+hierarchy.addEntity("-1#1", 1);
+console.log("---------- ***** ----------");
+console.log(hierarchy.getData());
+hierarchy.reparent("-1#1", "-1#0");
+console.log("---------- ***** ----------");
+console.log(hierarchy.getData());
+hierarchy.addEntity("-1#2", 2);
+hierarchy.reparent("-1#2", "-1#1");
+var ret = hierarchy.reparent("-1#0", "-1#2");
+console.log("---------- ***** ----------");
+console.log(hierarchy.getData());
+console.log(ret);
+hierarchy.deleteEntity("-1#0");
+console.log("---------- ***** ----------");
+console.log(hierarchy.getData());
 /**
  * Initiate server
  */

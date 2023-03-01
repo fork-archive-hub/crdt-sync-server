@@ -12,63 +12,98 @@ var __assign = (this && this.__assign) || function () {
 };
 exports.__esModule = true;
 exports.Hierarchy = exports.Entity = void 0;
-var tree_js_1 = require("../data-structures/tree.js");
 var Entity = /** @class */ (function () {
-    function Entity(id, relationship, properties) {
+    function Entity(id, value) {
         this.id = id;
-        this.relationship = relationship;
-        this.properties = properties;
+        this.value = value;
+        this.childrenIds = [];
     }
     return Entity;
 }());
 exports.Entity = Entity;
 var Hierarchy = /** @class */ (function () {
     function Hierarchy(rootId) {
-        // Initialize document w/ a mapping of document objects
         this.rootId = rootId;
         this.entities = {};
-        this.initializeTree();
-        this.entities[rootId] = new Entity(rootId, {
-            parentId: rootId,
-            fractionalIndex: 0.0
-        }, {});
+        var root = new Entity(rootId, undefined);
+        root.parentId = rootId;
+        this.entities[rootId] = root;
     }
-    Hierarchy.prototype.initializeTree = function () {
-        this.tree = new tree_js_1.Tree(this.rootId);
-    };
-    /**
-     * Object creation & destruction
-     */
-    Hierarchy.prototype.addEntity = function (entity) {
-        if (this.tree.createNode(entity.id) &&
-            this.tree.reparent(entity.id, entity.relationship.parentId)) {
-            this.entities[entity.id] = new Entity(entity.id, entity.relationship, entity.properties);
-            return true;
+    Hierarchy.prototype.addEntity = function (id, value) {
+        if (this.entities[id] !== undefined) {
+            return false;
         }
-        return false;
+        var entity = new Entity(id, value);
+        entity.parentId = this.rootId;
+        this.entities[this.rootId].childrenIds.push(id);
+        this.entities[id] = entity;
+        return true;
     };
     Hierarchy.prototype.deleteEntity = function (id) {
         var _this = this;
-        var nodes = this.tree.deleteNode(id);
-        if (nodes.length) {
-            nodes.forEach(function (id) {
-                delete _this.entities[id];
-            });
-            return { result: true, ids: nodes };
+        if (id === this.rootId) {
+            return {
+                result: false,
+                ids: []
+            };
         }
-        return { result: false, ids: [] };
+        if (this.entities[id] === undefined) {
+            return {
+                result: false,
+                ids: []
+            };
+        }
+        var deletedIds = [];
+        this.deleteEntityRecursive(id, deletedIds);
+        deletedIds.forEach(function (id) {
+            delete _this.entities[id];
+        });
+        return {
+            result: true,
+            ids: deletedIds
+        };
+    };
+    Hierarchy.prototype.deleteEntityRecursive = function (id, deletedIds) {
+        var entity = this.entities[id];
+        entity.parentId = undefined;
+        for (var i = 0; i < entity.childrenIds.length; ++i) {
+            this.deleteEntityRecursive(entity.childrenIds[i], deletedIds);
+        }
+        deletedIds.push(id);
+        delete this.entities[id];
     };
     Hierarchy.prototype.reparent = function (id, newParentId) {
-        // Perform reparenting in tree representation
-        if (this.tree.reparent(id, newParentId)) {
-            // TODO: Implement logic for fractional index
-            this.entities[id].relationship = {
-                parentId: newParentId,
-                fractionalIndex: 0.0
-            };
-            return true;
+        if (this.entities[id] === undefined ||
+            this.entities[newParentId] === undefined ||
+            id === this.rootId ||
+            id === newParentId) {
+            return false;
         }
-        return false;
+        if (this.checkCycle(id, newParentId)) {
+            return false;
+        }
+        var entity = this.entities[id];
+        this.removeItem(this.entities[entity.parentId].childrenIds, id);
+        entity.parentId = newParentId;
+        this.entities[newParentId].childrenIds.push(id);
+        return true;
+    };
+    Hierarchy.prototype.checkCycle = function (id, newParentId) {
+        var res = false;
+        while (newParentId !== this.rootId) {
+            if (newParentId === id) {
+                res = true;
+                break;
+            }
+            newParentId = this.entities[newParentId].parentId;
+        }
+        return res;
+    };
+    Hierarchy.prototype.removeItem = function (arr, item) {
+        var index = arr.indexOf(item);
+        if (index !== -1) {
+            arr.splice(index, 1);
+        }
     };
     Hierarchy.prototype.getData = function (id) {
         var res = [];
