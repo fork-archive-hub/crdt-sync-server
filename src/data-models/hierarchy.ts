@@ -13,7 +13,7 @@ interface EntityInterface {
 }
 
 /**
- * Server data model is governed entirely by a tree representation
+ * Server data model is governed entirely by a tdree representation
  */
 interface HierarchyInterface {
 	rootId: string;
@@ -21,6 +21,7 @@ interface HierarchyInterface {
 	entities: {
 		[key: string]: EntityInterface;
 	};
+    
 	addEntity(id: string, value: number): boolean;
 	deleteEntity(id: string): {
 		result: boolean;
@@ -160,10 +161,18 @@ class Hierarchy implements HierarchyInterface {
     getData(id?: string): string {
         const res = [];
         if (id) {
-            res.push({...this.entities[id]});
+            res.push({
+                id: id,
+                parentId: this.entities[id].parentId,
+                value: this.entities[id].value
+            });
         } else {
             for (const [key, value] of Object.entries(this.entities)) {
-                res.push({...value});
+                res.push({
+                    id: value.id,
+                    parentId: value.parentId,
+                    value: value.value
+                });
             }
         }
 

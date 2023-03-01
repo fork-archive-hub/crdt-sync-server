@@ -26,11 +26,19 @@ app.get("/", function (req, res) {
  */
 io.on("connection", function (socket) {
     console.log("User: ".concat(socket.id, " connected"));
+    socket.emit("init", hierarchy.getData());
     socket.on("createEntity", function (data, callback) {
         var entityData = JSON.parse(data)[0];
-        console.log("on createEntity: ");
-        console.log("data: ".concat(entityData));
-        callback({ status: "ok" });
+        // console.log("on createEntity: ");
+        // console.log(`data: ${entityData}`);
+        var res = hierarchy.addEntity(entityData.id, entityData.value);
+        if (res) {
+            io.emit("createEntity", hierarchy.getData(entityData.id));
+            callback({ status: "Ok" });
+        }
+        else {
+            callback({ status: "Err" });
+        }
     });
     socket.on("deleteEntity", function (id) {
         console.log("on deleteEntity: ");
@@ -49,22 +57,23 @@ io.on("connection", function (socket) {
  * Initial setup
  */
 var hierarchy = new hierarchy_1.Hierarchy("-1#-1");
-hierarchy.addEntity("-1#0", 0);
-hierarchy.addEntity("-1#1", 1);
-console.log("---------- ***** ----------");
-console.log(hierarchy.getData());
-hierarchy.reparent("-1#1", "-1#0");
-console.log("---------- ***** ----------");
-console.log(hierarchy.getData());
-hierarchy.addEntity("-1#2", 2);
-hierarchy.reparent("-1#2", "-1#1");
-var ret = hierarchy.reparent("-1#0", "-1#2");
-console.log("---------- ***** ----------");
-console.log(hierarchy.getData());
-console.log(ret);
-hierarchy.deleteEntity("-1#0");
-console.log("---------- ***** ----------");
-console.log(hierarchy.getData());
+// TEST
+// hierarchy.addEntity("-1#0", 0);
+// hierarchy.addEntity("-1#1", 1);
+// console.log("---------- ***** ----------");
+// console.log(hierarchy.getData());
+// hierarchy.reparent("-1#1", "-1#0");
+// console.log("---------- ***** ----------");
+// console.log(hierarchy.getData());
+// hierarchy.addEntity("-1#2", 2);
+// hierarchy.reparent("-1#2", "-1#1");
+// const ret = hierarchy.reparent("-1#0", "-1#2");
+// console.log("---------- ***** ----------");
+// console.log(hierarchy.getData());
+// console.log(ret);
+// hierarchy.deleteEntity("-1#0");
+// console.log("---------- ***** ----------");
+// console.log(hierarchy.getData());
 /**
  * Initiate server
  */

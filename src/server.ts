@@ -29,28 +29,44 @@ app.get("/", (req, res) => {
  */
 io.on("connection", (socket: Socket) => {
     console.log(`User: ${socket.id} connected`);
+    socket.emit("init", hierarchy.getData());
 
     socket.on("createEntity", (data, callback) => {
         const entityData = JSON.parse(data)[0];
 
-        console.log("on createEntity: ");
-        console.log(`data: ${entityData}`);
+        // console.log("on createEntity: ");
+        // console.log(`data: ${entityData}`);
 
-        callback({ status: "ok" });
+        const res = hierarchy.addEntity(entityData.id, entityData.value);
+        if (res) {
+            io.emit("createEntity", hierarchy.getData(entityData.id));
+            callback({ status: "Ok" });
+        } else {
+            callback({ status: "Err" });
+        }
     });
 
     socket.on("deleteEntity", (id) => {
-        console.log("on deleteEntity: ");
-        console.log(`data: ${id}`);
+        // console.log("on deleteEntity: ");
+        // console.log(`data: ${id}`);
+
+        const res = hierarchy.deleteEntity(id);
+        if (res.result) {
+            io.emit("deleteEntity", res.ids);
+        }
     });
 
     socket.on("reparentEntity", (reparentData: {
         id: string,
         newParentId: string
     }) => {
-        // Handle reparent entity
-        console.log("on reparentEntity: ");
-        console.log(`data: ${reparentData}`);
+        // console.log("on reparentEntity: ");
+        // console.log(`data: ${reparentData}`);
+
+        const res = hierarchy.reparent(reparentData.id, reparentData.newParentId);
+        if (res) {
+            io.emit("reparentEntity", reparentData);
+        }
     });
 
     socket.on("disconnect", () => {
