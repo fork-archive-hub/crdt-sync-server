@@ -10,11 +10,15 @@ var hierarchy_1 = require("./data-models/hierarchy");
  */
 var app = express();
 var server = http.createServer(app);
-var io = new socket_io_1.Server(server);
+var io = new socket_io_1.Server(server, {
+    cors: {
+        origin: "http://localhost:8080"
+    }
+});
 /**
  * Middleware
  */
-app.use(express.static("dist"));
+// app.use(express.static("dist"));
 /**
  * Resolvers
  */
@@ -41,13 +45,20 @@ io.on("connection", function (socket) {
         }
     });
     socket.on("deleteEntity", function (id) {
-        console.log("on deleteEntity: ");
-        console.log("data: ".concat(id));
+        // console.log("on deleteEntity: ");
+        // console.log(`data: ${id}`);
+        var res = hierarchy.deleteEntity(id);
+        if (res.result) {
+            io.emit("deleteEntity", res.ids);
+        }
     });
     socket.on("reparentEntity", function (reparentData) {
-        // Handle reparent entity
-        console.log("on reparentEntity: ");
-        console.log("data: ".concat(reparentData));
+        // console.log("on reparentEntity: ");
+        // console.log(`data: ${reparentData}`);
+        var res = hierarchy.reparent(reparentData.id, reparentData.newParentId);
+        if (res) {
+            io.emit("reparentEntity", reparentData);
+        }
     });
     socket.on("disconnect", function () {
         console.log("User: ".concat(socket.id, " disconnected"));

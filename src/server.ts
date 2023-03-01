@@ -1,21 +1,24 @@
-const path = require("path");
 const http = require("http");
 const express = require("express");
 
 import { Server, Socket } from "socket.io";
-import { HierarchyInterface, Hierarchy, Entity, EntityInterface } from "./data-models/hierarchy";
+import { Hierarchy } from "./data-models/hierarchy";
 
 /**
  * Create server instance & configure
  */
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+const io = new Server(server, {
+    cors: {
+        origin: "http://localhost:8080"
+    }
+});
 
 /**
  * Middleware
  */
-app.use(express.static("dist"));
+// app.use(express.static("dist"));
 
 /**
  * Resolvers
